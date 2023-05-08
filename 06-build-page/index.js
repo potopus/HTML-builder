@@ -35,8 +35,8 @@ function createBundle(sourceFolder, destinationFolder) {
             console.log(`Файл ${path.parse(filePath).name} удален`);
           });
         });
+        // пока доделал до сюда
 
-        
       })
     })
   })
