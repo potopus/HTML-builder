@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "html-builder task for RSSchool",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "author": "evgeniimal",
   "license": "ISC",
@@ -13,6 +15,6 @@
   "homepage": "https://github.com/EvgeniiMal/html-builder-black#readme",
   "devDependencies": {
     "@types/node": "^16.11.4",
-    "eslint": "^7.32.0"
+    "eslint": "^8.40.0"
   }
 }
