@@ -1,4 +1,5 @@
 const fs = require('fs');
+const fsp = require('fs').promises;
 const path = require('path');
 const templateHTML = path.join(__dirname, 'template.html');
 const destinationFolder = path.join(__dirname, './project-dist');
@@ -18,29 +19,33 @@ function createBundle(sourceFolder, destinationFolder) {
         return;
       }
 
-      // Удаляем все файлы из папки 'files-copy'
-      fs.readdir(destinationFolder, (err, destinationFiles) => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        console.log("Те самые файлы:" + destinationFiles);
-        destinationFiles.forEach((file) => {
-          const filePath = path.join(destinationFolder, file);
-          fs.unlink(filePath, (err) => {
-            if (err) {
-              console.error(err);
-              return;
-            }
-            console.log(`Файл ${path.parse(filePath).name} удален`);
-          });
-        });
-        // пока доделал до сюда
-
-      })
+      // Удаляем все файлы из папки 'project-dist'
+      clearFolder(destinationFolder).catch(console.error);
     })
+
+    // собираем файл html
+    
+
   })
 }
+
+
+
+async function clearFolder(folderPath) {
+  console.log(folderPath);
+  const files = await fsp.readdir(folderPath); // читаем содержимое папки
+  for (const file of files) {
+    const filePath = path.join(folderPath, file); // получаем полный путь к файлу/папке
+    const stat = await fsp.stat(filePath); // получаем информацию о файле/папке
+    if (stat.isDirectory()) { // если это папка
+      await clearFolder(filePath); // рекурсивно вызываем clearFolder для удаления содержимого
+      await fsp.rmdir(filePath); // удаляем пустую папку
+    } else { // если это файл
+      await fsp.unlink(filePath); // удаляем файл
+    }
+  }
+}
+
 
 
 
