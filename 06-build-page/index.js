@@ -18,7 +18,7 @@ const templateVars = {
 
 async function createBundle(sourceFolder, destinationFolder) {
   // Создаем новую папку 'project-dist'
-   fs.mkdir(destinationFolder, { recursive: true }, (err) => {
+  fs.mkdir(destinationFolder, { recursive: true }, (err) => {
     if (err) {
       console.error(err);
       return;
@@ -36,6 +36,7 @@ async function createBundle(sourceFolder, destinationFolder) {
 
         console.log("Удаление выполнено работаем дальше: ")
 
+      }).then(() => {
 
         // собираем файл html
         // прочитать файл template.html в переменную
@@ -44,52 +45,46 @@ async function createBundle(sourceFolder, destinationFolder) {
             console.error(err);
             return;
           }
+
           console.log("Сборка HTML");
           // создаю цикл для чтения файла из каталога components
 
           for (let tempFile of filesHTML) {
-            // получить нужный шаблон, согласно используемого файла
-            let temple = templateVars[tempFile];
-
+            console.log("цикл чтения файлов html")
             // читаю файл tempFile и записываю его в переменную varCode
-            // console.log("Путь к файлу:  " + path.join(sourceFolder, tempFile) + "   ::  шаблон:  " + temple);
             readFileIntoVariable(path.join(sourceFolder, tempFile)).then(function (result) {
-              // console.log("result");
-              // console.log(result);
+              // получить нужный шаблон, согласно используемого файла
+              let temple = templateVars[tempFile];
               let regexp = new RegExp(`${temple}`, 'g');
-              // console.log( data);
               // заменяю шалон {{...}} на текст из соответствующего файла
               data = data.replace(regexp, `\n${result}`);
-              if (temple === "{{header}}") { console.log(data) };
               return data
-            }).then( (result)=>{
-              writeFileFromVariable(path.join(destinationFolder, './index.html'), result).then(() => {
-                console.log('File successfully written.');
-              }).catch((err) => {
-                console.error(`Error writing file: ${err}`);
-              });
+            }).then((result) => {
+              if (result.includes("!DOCTYPE")) {
+                writeFileFromVariable(path.join(destinationFolder, './index.html'), result).then(() => {
+                  console.log('File successfully written.');
+                }).catch((err) => {
+                  console.error(`Error writing file: ${err}`);
+                });
+              }
             });
           }
-          // console.log(data);
-
         })
-      }).then(() => {
-        console.log('CSS');
+        return "text";
+      }).then((result) => {
+        console.log('CSS ' + result);
         // получаем-читаем список файлов из папки styles
         fs.readdir(cssFolder, (err, files) => {
           if (err) {
             console.error(err);
             return;
           }
-          console.log('вход  в readdir 06');
           // сортирую файлы CSS по шаблону
           let sortStyleFiles = sortArrFiles(files, arrTempl);
-          console.log(sortStyleFiles);
           // добавляю слияание, как в 5 задании
           const targetFile = path.join(destinationFolder, 'style.css');
           const fileWriteStream = fs.createWriteStream(targetFile); // Создаем доступный для записи поток
           // добавляю импортированную функцию
-          console.log('Добавление в файл styles' + cssFolder);
           streamMergeRecursive(sortStyleFiles, cssFolder, fileWriteStream);
         });
       }
@@ -113,16 +108,11 @@ async function writeFileFromVariable(filePath, data) {
 
 async function copyFolder(source, destination) {
   try {
-    // добавляем регулярное выражения для получения папки в которой находится рессурс для копирования
-    // var nameSourceFolder = source.match(/^.*\\([^\\]+)$/)[1];//получить имя assets
-    // сздаю путь в целевую для сборки
-    // let folderToSaveSource = path.join(destination, nameSourceFolder);
     // создаю папку для копирования файлов в целевой сборочной папке
     await fs.promises.mkdir(destination, { recursive: true });
-    // function copyData ()
     // читаю то что находится в ресурсной папке на первом уровне
     const files = await fs.promises.readdir(source, { withFileTypes: true });
-    // копирую файлы и 
+    // копирую файлы и папки с вызовом рекурсии
     for (const file of files) {
       const sourcePath = `${source}/${file.name}`;
       const destinationPath = `${destination}/${file.name}`;
@@ -141,7 +131,6 @@ async function copyFolder(source, destination) {
 async function readFileIntoVariable(filePath) {
   try {
     const result = await fsp.readFile(filePath, 'utf8');
-    // console.log(result);
     return result;
   } catch (err) {
     throw err;
@@ -150,7 +139,6 @@ async function readFileIntoVariable(filePath) {
 
 
 async function clearFolder(folderPath) {
-  // console.log(folderPath);
   console.log("работает удаление");
   const files = await fsp.readdir(folderPath); // читаем содержимое папки
   for (const file of files) {
@@ -158,7 +146,6 @@ async function clearFolder(folderPath) {
     const stat = await fsp.stat(filePath); // получаем информацию о файле/папке
     if (stat.isDirectory()) { // если это папка
       await clearFolder(filePath); // рекурсивно вызываем clearFolder для удаления содержимого
-      console.log("Удаляем папку::  " + filePath)
       await fsp.rm(filePath, { recursive: true, force: true }); // удаляем пустую папку
     } else { // если это файл
       await fsp.unlink(filePath); // удаляем файл
@@ -189,8 +176,6 @@ function streamMergeRecursive(styleFiles = [], sourceFolder, fileWriteStream) {
   if (!styleFiles.length) {
     return fileWriteStream.end('/* слияние завершено */'); // Наконец, закрываем доступный для записи поток, чтобы предотвратить утечку памяти
   }
-  console.log('sourceFolder');
-  console.log(sourceFolder);
   const currentFile = path.resolve(sourceFolder, styleFiles.shift());
   const currentReadStream = fs.createReadStream(currentFile); // Получить текущий читаемый поток
 
