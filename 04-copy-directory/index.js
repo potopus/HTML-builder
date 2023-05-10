@@ -27,7 +27,7 @@ fs.mkdir(destinationFolder, { recursive: true }, (err) => {
         console.error(err);
         return;
       }
-      console.log("Те самые файлы:" + destinationFiles);
+      console.log('Те самые файлы:' + destinationFiles);
       destinationFiles.forEach((file) => {
         const filePath = path.join(destinationFolder, file);
         fs.unlink(filePath, (err) => {
