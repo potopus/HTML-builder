@@ -70,7 +70,7 @@ function streamMerge(srcFolder, destinationFolder) {
 function streamMergeRecursive(styleFiles = [], sourceFolder, fileWriteStream) {
   // Рекурсивно к оценке хвостовой ситуации
   if (!styleFiles.length) {
-    return fileWriteStream.end('console.log (\'Слияние потока завершено\')'); // Наконец, закрываем доступный для записи поток, чтобы предотвратить утечку памяти
+    return fileWriteStream.end('/*Слияние потока завершено*/'); // Наконец, закрываем доступный для записи поток, чтобы предотвратить утечку памяти
   }
   console.log('sourceFolder');
   console.log(sourceFolder);

@@ -146,11 +146,11 @@ async function clearFolder(folderPath) {
   const files = await fsp.readdir(folderPath); // читаем содержимое папки
   for (const file of files) {
     const filePath = path.join(folderPath, file); // получаем полный путь к файлу/папке
-    const stat = await fsp.stat(filePath); // получаем информацию о файле/папке
-    if (stat.isDirectory()) { // если это папка
+    const stat = await fsp.stat(filePath); 
+    if (stat.isDirectory()) { 
       await clearFolder(filePath); // рекурсивно вызываем clearFolder для удаления содержимого
       await fsp.rm(filePath, { recursive: true, force: true }); // удаляем пустую папку
-    } else { // если это файл
+    } else { 
       await fsp.unlink(filePath); // удаляем файл
     }
   }
