@@ -1,5 +1,5 @@
+const fsp = require('fs/promises');
 const fs = require('fs');
-const fsp = require('fs').promises;
 const path = require('path');
 const templateHTML = path.join(__dirname, 'template.html');
 const destinationFolder = path.join(__dirname, './project-dist');
@@ -13,6 +13,9 @@ const arrTempl = ['header', 'main', 'footer'];
 
 
 async function createBundle(sourceFolder, destinationFolder) {
+  // Удаляем все файлы из папки 'project-dist'
+  await clearFolder(destinationFolder);
+  // await fsp.rm(destinationFolder, {recursive:true, force: true})
   // Создаем новую папку 'project-dist'
   await fsp.mkdir(destinationFolder, { recursive: true });
 
@@ -22,8 +25,6 @@ async function createBundle(sourceFolder, destinationFolder) {
 
 
 
-  // Удаляем все файлы из папки 'project-dist'
-  await clearFolder(destinationFolder)
 
     console.log('Удаление выполнено работаем дальше: ');
 
