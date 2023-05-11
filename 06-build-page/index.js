@@ -13,11 +13,11 @@ const arrTempl = ['header', 'main', 'footer'];
 
 
 async function createBundle(sourceFolder, destinationFolder) {
-  // Удаляем все файлы из папки 'project-dist'
-  await clearFolder(destinationFolder);
   // await fsp.rm(destinationFolder, {recursive:true, force: true})
   // Создаем новую папку 'project-dist'
   await fsp.mkdir(destinationFolder, { recursive: true });
+  // Удаляем все файлы из папки 'project-dist'
+  await clearFolder(destinationFolder);
 
 
   // Получаем список файлов в папке 'components'
@@ -26,71 +26,72 @@ async function createBundle(sourceFolder, destinationFolder) {
 
 
 
-    console.log('Удаление выполнено работаем дальше: ');
+  console.log('Удаление выполнено работаем дальше: ');
 
-  
 
-    // собираем файл html
-    // прочитать файл template.html в переменную
-    let data= await fsp.readFile(templateHTML, 'utf8');
 
-      console.log('Сборка HTML');
-      // Получить список переменных
-      const templateVars = getVarsFromComponentsFolder(filesHTML);
-      // создаю цикл для чтения файла из каталога components
-      
-      const fileData = {};
-      for (const filename of filesHTML) {
-        try {
-          const data = await fsp.readFile(path.join(sourceFolder,filename), 'utf-8');
-          const key = filename.replace(/\..+$/, ''); // получаем имя файла без расширения
-          fileData[key] = data; // добавляем данные файла в объект
-        } catch (err) {
-          console.error(`Error reading file: ${filename}`);
-          throw err;
-        }
-      }
-      // console.log(fileData);
-       filesHTML.forEach((fileHtml)=> {
-        console.log('цикл чтения файлов html');
-        // читаю файл tempFile и записываю его в переменную varCode
-        // readFileIntoVariable(path.join(sourceFolder, tempFile))
-          // const tempFile = await fsp.readFile(path.join(sourceFolder,fileHtml), 'utf8');
-          // получить нужный шаблон, согласно используемого файла
-          // console.log(tempFile);
-          const key = fileHtml.replace(/\..+$/, ''); // получаем имя файла без расширения
-          let temple = templateVars[fileHtml];
-          let regexp = new RegExp(`${temple}`, 'g');
-          // заменяю шалон {{...}} на текст из соответствующего файла
-          data =  data.replace(`{{${key}}}`, `\n${fileData[key]}`);
-          
-        })
-        await fsp.writeFile(path.join(destinationFolder, './index.html'), data);
-        // if (result.includes('!DOCTYPE')) {
-          //   writeFileFromVariable(path.join(destinationFolder, './index.html'), result)
-          // }
-          // console.log(data);
-      
-    
-    
- 
-    console.log('CSS ' );
-    // получаем-читаем список файлов из папки styles
-   let files = await fsp.readdir(cssFolder); 
-      // сортирую файлы CSS по шаблону
-      let sortStyleFiles = sortArrFiles(files, arrTempl);
-      // добавляю слияание, как в 5 задании
-      const targetFile = path.join(destinationFolder, 'style.css');
-      const fileWriteStream = fs.createWriteStream(targetFile); // Создаем доступный для записи поток
-      // добавляю импортированную функцию
-    await  streamMergeRecursive(sortStyleFiles, cssFolder, fileWriteStream);
-    
- 
-  
-    console.log('copy folder');
-    copyFolder(assetsFolder, assetsDestinationFolder).catch(error => console.error(error));
+  // собираем файл html
+  // прочитать файл template.html в переменную
+  let data = await fsp.readFile(templateHTML, 'utf8');
 
- 
+  console.log('Сборка HTML');
+  // Получить список переменных
+  const templateVars = getVarsFromComponentsFolder(filesHTML);
+  // создаю цикл для чтения файла из каталога components
+
+  const fileData = {};
+  for (const filename of filesHTML) {
+    try {
+      const data = await fsp.readFile(path.join(sourceFolder, filename), 'utf-8');
+      const key = filename.replace(/\..+$/, ''); // получаем имя файла без расширения
+      fileData[key] = data; // добавляем данные файла в объект
+    } catch (err) {
+      console.error(`Error reading file: ${filename}`);
+      throw err;
+    }
+  }
+  // console.log(fileData);
+  filesHTML.forEach((fileHtml) => {
+    console.log('цикл чтения файлов html');
+    // читаю файл tempFile и записываю его в переменную varCode
+    // readFileIntoVariable(path.join(sourceFolder, tempFile))
+    // const tempFile = await fsp.readFile(path.join(sourceFolder,fileHtml), 'utf8');
+    // получить нужный шаблон, согласно используемого файла
+    // console.log(tempFile);
+    const key = fileHtml.replace(/\..+$/, ''); // получаем имя файла без расширения
+    let temple = templateVars[fileHtml];
+    let regexp = new RegExp(`${temple}`, 'g');
+    // заменяю шалон {{...}} на текст из соответствующего файла
+    data = data.replace(`{{${key}}}`, `\n${fileData[key]}`);
+
+  })
+  await fsp.writeFile(path.join(destinationFolder, './index.html'), data);
+  // if (result.includes('!DOCTYPE')) {
+  //   writeFileFromVariable(path.join(destinationFolder, './index.html'), result)
+  // }
+  // console.log(data);
+
+
+
+
+  console.log('CSS ');
+  // получаем-читаем список файлов из папки styles
+  let files = await fsp.readdir(cssFolder);
+  // сортирую файлы CSS по шаблону
+  let sortStyleFiles = sortArrFiles(files, arrTempl);
+  console.log (sortStyleFiles);
+  // добавляю слияание, как в 5 задании
+  const targetFile = path.join(destinationFolder, 'style.css');
+  const fileWriteStream = fs.createWriteStream(targetFile); // Создаем доступный для записи поток
+  // добавляю импортированную функцию
+  await streamMergeRecursive(sortStyleFiles, cssFolder, fileWriteStream);
+
+
+
+  console.log('copy folder');
+  copyFolder(assetsFolder, assetsDestinationFolder).catch(error => console.error(error));
+
+
 
 }
 
@@ -157,12 +158,21 @@ async function clearFolder(folderPath) {
 
 function sortArrFiles(filesArr, arrTempl) {
   let sortFiles = [];
-  arrTempl.forEach((elem) => {
-    filesArr.forEach((file) => {
-      if (file.includes(elem)) { sortFiles.push(file); }
-    });
+  // arrTempl.forEach((elem) => {
+  //   filesArr.forEach((file) => {
+  //     if (file.includes(elem)) { sortFiles.push(file); }
+  //   });
+  // });
+  filesArr.sort((a, b) => {
+    if (a === 'header.css') {
+      return -1;
+    }
+    if (b === 'header.css') {
+      return 1;
+    }
+    return 0;
   });
-  return sortFiles;
+  return filesArr;
 }
 
 
